@@ -9,7 +9,7 @@
 [contribute]: #Contributing
 [conservative_impl_trait]: https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md
 
-Accord is a library for validating data according to rules like "contains", "length", "either".
+Accord is a library for validating data according to rules like *length*, *contains*, *range* and *either*.
 
 Accord is two fold, the first part being a set of validator-functions that
 for example tests that a `String` is a minimum 5 characters long or that an `i32`
