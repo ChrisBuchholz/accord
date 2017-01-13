@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ChrisBuchholz/accord.svg?branch=master)](https://travis-ci.org/ChrisBuchholz/accord)
 [![Current Crates.io Version](https://img.shields.io/crates/v/accord.svg)](https://crates.io/crates/accord)
+[![API Documentation](https://docs.rs/accord/badge.svg)](https://docs.rs/accord)
 
 ⚠️ Accord uses the unstable feature
 [conservative_impl_trait] and thus requires nightly until the feature lands in beta/stable.
