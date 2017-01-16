@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate accord;
 
-use accord::{Accord, validate, Result as AccordResult};
+use accord::{Accord, Result as AccordResult, MultipleError, MultipleInvalid};
 use accord::validators::{length, contains, range};
 
 struct Account {
@@ -13,27 +13,27 @@ struct Account {
 impl Accord for Account {
     fn validate(&self) -> AccordResult {
         rules!{
-            self.name => [length(1, 64)],
-            self.email => [length(5, 64), contains("@"), contains(".")],
-            self.age => [range(12, 127)]
+            "name" => self.name => [length(1, 64)],
+            "email" => self.email => [length(5, 64), contains("@"), contains(".")],
+            "age" => self.age => [range(12, 127)]
         }
     }
 }
 
 #[test]
 fn main() {
-    let a = Account {
+    let okay = Account {
         name: "Test Test".to_string(),
         email: "test@test.test".to_string(),
         age: 25,
     };
 
-    let b = Account {
+    let error = Account {
         name: "Test".to_string(),
         email: "testtest.test".to_string(),
         age: 11,
     };
 
-    assert!(a.validate().is_ok());
-    assert!(b.validate().is_err());
+    assert!(okay.validate().is_ok());
+    assert!(error.validate().is_err());
 }

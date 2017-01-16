@@ -1,35 +1,25 @@
 use rocket::http::Status;
-use rocket::response::{Response, Responder};
+use rocket::response::{Response, Responder, status};
 use rocket_contrib::JSON;
-use std::error::Error;
-use accord::Error as AccordError;
+use accord::MultipleError;
 
 #[derive(Debug)]
 pub enum ApiError {
-    AccordError(AccordError),
-}
-
-#[derive(Serialize)]
-pub struct ErrorResponse {
-    pub status: &'static str,
-    pub message: String,
+    MultipleError(MultipleError),
 }
 
 impl<'r> Responder<'r> for ApiError {
     fn respond(self) -> Result<Response<'r>, Status> {
-        let message = match self {
-            ApiError::AccordError(error) => format!("{:?}", error),
-        };
-        JSON(ErrorResponse {
-                status: "error",
-                message: message,
-            })
-            .respond()
+        match self {
+            ApiError::MultipleError(e) => {
+                status::Custom(Status::from_code(422).unwrap(), JSON(e)).respond()
+            }
+        }
     }
 }
 
-impl From<AccordError> for ApiError {
-    fn from(error: AccordError) -> ApiError {
-        ApiError::AccordError(error)
+impl From<MultipleError> for ApiError {
+    fn from(e: MultipleError) -> ApiError {
+        ApiError::MultipleError(e)
     }
 }

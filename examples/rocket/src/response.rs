@@ -1,4 +1,5 @@
 use rocket::http::Status;
+use rocket::response::status;
 use rocket::response::{Response, Responder};
 use error::ApiError;
 
@@ -6,10 +7,7 @@ pub struct ApiResponse<T>(pub Status, pub T);
 
 impl<'r, T: Responder<'r>> Responder<'r> for ApiResponse<T> {
     fn respond(self) -> Result<Response<'r>, Status> {
-        Response::build()
-            .merge(self.1.respond()?)
-            .status(self.0)
-            .ok()
+        status::Custom(self.0, self.1).respond()
     }
 }
 

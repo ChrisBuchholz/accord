@@ -16,33 +16,15 @@ mod account;
 mod error;
 mod response;
 
-use rocket::{Request, Data, Outcome, Error};
-use rocket::http::Status;
-use rocket::data::{self, FromData};
-use rocket_contrib::JSON;
-use error::ApiError;
 use response::{ApiResult, ApiResponse};
 use account::Account;
-use accord::{Accord, Error as AccordError};
-
-impl FromData for Account
-    where Account: Accord
-{
-    type Error = AccordError;
-    fn from_data(r: &Request, data: Data) -> data::Outcome<Self, Self::Error> {
-        let json = JSON::<Account>::from_data(&r, data).unwrap();
-        let account = json.unwrap();
-        if let Err(err) = account.validate() {
-            let error = err[0].clone();
-            return Outcome::Failure((Status::from_code(422).unwrap(), error));
-        }
-        Outcome::Success(account)
-    }
-}
+use rocket_contrib::JSON;
+use rocket::http::Status;
+use accord::MultipleError;
 
 #[post("/", data = "<account>")]
-fn json(account: Account) -> ApiResult<JSON<Account>> {
-    Ok(ApiResponse(Status::Ok, JSON(account)))
+fn json(account: Result<Account, MultipleError>) -> ApiResult<JSON<Account>> {
+    account.map(|a| ApiResponse(Status::Ok, JSON(a))).map_err(|e| e.into())
 }
 
 fn main() {

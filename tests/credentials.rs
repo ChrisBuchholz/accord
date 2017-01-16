@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate accord;
 
-use accord::{Accord, validate, Result as AccordResult};
+use accord::{Accord, Result as AccordResult, MultipleError, MultipleInvalid};
 use accord::validators::{length, contains};
 
 struct Credentials {
@@ -12,8 +12,8 @@ struct Credentials {
 impl Accord for Credentials {
     fn validate(&self) -> AccordResult {
         rules!{
-            self.email => [length(5, 64), contains("@"), contains(".")],
-            self.password => [length(8, 64)]
+            "email" => self.email => [length(5, 64), contains("@"), contains(".")],
+            "email" => self.password => [length(8, 64)]
         }
     }
 }

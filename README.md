@@ -13,12 +13,26 @@
 Accord is a library for validating data according to rules like *length*, *contains*, *range* and *either*.
 
 Accord is two fold, the first part being a set of validator-functions that
-for example tests that a `String` is a minimum 5 characters long or that an `i32`
-is either 10 or 20, and the second part being a set of primitives that enables
-you to pair these validators and run a "validation suite" on the contents of
-a struct or any other data, to make sure that it contains what you expect it does
-and if not, it returns useful error messages that can be shown to a user to help
-the user fix the validation issue. 
+for example tests that a `String` has a minimum of 5 characters or that an `i32`
+is either 10 or 20, and the second part being the `rules!` macro which allows you
+to run a set of validators on a single piece of data, or a whole collection of data
+and get back a set of errors which explains exactly what is wrong. The errors can
+easily be serialized using [Serde] and then be used in for example a REST API to
+report to the user which of the data the user posted contains illegal values.
+
+See the [Rocket example] for how to use Accord with [Rocket] to validate `JSON` input
+and return explanations for any occuring error as `JSON` which then can be
+parsed by the requesting application and shown to the user to guide them in
+how to fix their input values according to the applications rules.
+
+Error messages uses numbered placeholders meaning that an error message could
+be *"Must not be less than %1."* with an accompanien list `[5]`, which makes
+it easy to translate *"Must not be less than %1."* without having to deal with the
+variable value `5`.
+
+[Serde]: https://serde.rs
+[Rocket]: https://rocket.rs
+[Rocket example]: https://github.com/ChrisBuchholz/accord/tree/master/examples/rocket
 
 ## Usage tl;dr:
 
@@ -26,7 +40,7 @@ the user fix the validation issue.
 #[macro_use]
 extern crate accord;
 
-use accord::validate;
+use accord::{Error, MultipleError, MultipleInvalid};
 use accord::validators::{length, contains, range};
 
 fn main() {
@@ -34,10 +48,21 @@ fn main() {
     let password = "kfjsdkfjsdkfjfksjdfkdsfjs".to_string();
     let age = 25;
 
-    let errors = rules!{
-        email => [length(5, 64), contains("@"), contains(".")],
-        password => [length(8, 64)],
-        age => [range(12, 127)]
+    // This way of using the the `rules!` macro returns a
+    // `Result<(), Error>`
+    let _ = rules!(email, [length(5, 64), contains("@"), contains(".")]);
+    let _ = rules!(password, [length(8, 64)]);
+    let _ = rules!(age, [range(12, 127)]);
+
+    // This way of using the `rules!` macro returns a 
+    // `Result<(), MultipleError>`. Notice the string slices that has
+    // been appended to the lines from last example. These string slices
+    // are called tags and are used to distingues between the sets of errors
+    // that are returned. 
+    let _ = rules!{
+        "email" => email => [length(5, 64), contains("@"), contains(".")],
+        "password" => password => [length(8, 64)],
+        "age" => age => [range(12, 127)]
     };
 }
 ```
