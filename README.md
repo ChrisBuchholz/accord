@@ -15,7 +15,7 @@ Accord is a library for validating data according to rules like *length*, *conta
 
 Accord is two fold, the first part being a set of validator-functions that
 for example tests that a `String` has a minimum of 5 characters or that an `i32`
-is either 10 or 20, and the second part being the `rules!` macro which allows you
+is either *10* or *20*, and the second part being the `rules!` macro which allows you
 to run a set of validators on a single piece of data, or a whole collection of data
 and get back a set of errors which explains exactly what is wrong. The errors can
 easily be serialized using [Serde] and then be used in for example a REST API to
