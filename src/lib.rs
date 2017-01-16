@@ -50,7 +50,6 @@ pub trait Accord {
 ///
 /// # Examples
 ///
-/// The `rules!` macro has two forms, the first being `rules!(
 /// You can run a list of validator on a single piece of data and get a `Result<(), Vec<Invalid>>`
 /// back using `rules!` single form, which can be done like so:
 ///
