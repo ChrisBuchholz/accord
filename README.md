@@ -120,8 +120,7 @@ inclusion in Accord by you shall be MIT License without any additional terms or 
 
 ## License
 
-Accord is Copyright (c) 2016 Christoffer Buchholz. It is free software, and
+Accord is Copyright (c) 2017 Christoffer Buchholz. It is free software, and
 may be redistributed under the terms specified in the [LICENSE] file.
 
 [LICENSE]: /LICENSE
-
