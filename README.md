@@ -75,12 +75,6 @@ fn main() {
 
 ## Building locally
 
-### Nightly
-
-Accord requires a nightly version of Rust since it uses the feature
-[conservative_impl_trait] which is not available in neither the
-beta or stable version yet.
-
 Building: `cargo build`
 
 Testing: `cargo test`
