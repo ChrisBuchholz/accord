@@ -75,7 +75,7 @@ pub trait Accord {
 /// returns a `Result<(), Vec<MultipleResult>>`.
 ///
 /// Notice that in the collection form, you also provide a tag, like *email* or *password*.
-/// This makes it easy to distingues between all the `MultipleInvalids` in the `Vector`.
+/// This makes it easy to distingues between all the `MultipleInvalid`s in the `Vector`.
 ///
 /// ```
 /// #[macro_use]
