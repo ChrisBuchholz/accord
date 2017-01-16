@@ -113,3 +113,26 @@ pub fn either<T>(values: Vec<T>) -> impl Fn(&T) -> ::ValidatorResult
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use validators::{length, range};
+
+    #[test]
+    fn test_length() {
+        assert!(length(3..5)(&"12".to_string()).is_err());
+        assert!(length(3..5)(&"123".to_string()).is_ok());
+        assert!(length(3..5)(&"1234".to_string()).is_ok());
+        assert!(length(3..5)(&"12345".to_string()).is_ok());
+        assert!(length(3..5)(&"123456".to_string()).is_err());
+    }
+
+    #[test]
+    fn test_range() {
+        assert!(range(12..127)(&11).is_err());
+        assert!(range(12..127)(&12).is_ok());
+        assert!(range(12..127)(&50).is_ok());
+        assert!(range(12..127)(&127).is_ok());
+        assert!(range(12..127)(&128).is_err());
+    }
+}
