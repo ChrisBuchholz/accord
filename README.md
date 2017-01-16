@@ -29,7 +29,7 @@ how to fix their input values according to the applications rules.
 Error messages uses numbered placeholders meaning that an error message could
 be *"Must not be less than %1."* with an accompanien list `[5]`, which makes
 it easy to translate *"Must not be less than %1."* without having to deal with the
-variable value `5`.
+variable value *5*.
 
 [Serde]: https://serde.rs
 [Rocket]: https://rocket.rs
