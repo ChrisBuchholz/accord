@@ -1,6 +1,6 @@
 [package]
 name = "accord"
-version = "0.1.2"
+version = "0.2.0"
 authors = ["Christoffer Buchholz <chris@chrisbuchholz.me>"]
 description = """
 Library for validating data according to rules like "contains", "length", "either", "range".
