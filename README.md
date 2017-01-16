@@ -21,8 +21,8 @@ and get back a set of errors which explains exactly what is wrong. The errors ca
 easily be serialized using [Serde] and then be used in for example a REST API to
 report to the user which of the data the user posted contains illegal values.
 
-See the [Rocket example] for how to use Accord with [Rocket] to validate `JSON` input
-and return explanations for any occuring error as `JSON` which then can be
+See the [Rocket example] for how to use Accord with [Rocket] to validate JSON input
+and return explanations for any occuring error as JSON which then can be
 parsed by the requesting application and shown to the user to guide them in
 how to fix their input values according to the applications rules.
 
