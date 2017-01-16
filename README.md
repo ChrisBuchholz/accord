@@ -51,9 +51,9 @@ fn main() {
 
     // This way of using the the `rules!` macro returns a
     // `Result<(), Error>`
-    let _ = rules!(email, [length(5, 64), contains("@"), contains(".")]);
-    let _ = rules!(password, [length(8, 64)]);
-    let _ = rules!(age, [range(12, 127)]);
+    let _ = rules!(email, [length(5..64), contains("@"), contains(".")]);
+    let _ = rules!(password, [length(8..64)]);
+    let _ = rules!(age, [range(12..127)]);
 
     // This way of using the `rules!` macro returns a 
     // `Result<(), MultipleError>`. Notice the string slices that has
@@ -61,9 +61,9 @@ fn main() {
     // are called tags and are used to distingues between the sets of errors
     // that are returned. 
     let _ = rules!{
-        "email" => email => [length(5, 64), contains("@"), contains(".")],
-        "password" => password => [length(8, 64)],
-        "age" => age => [range(12, 127)]
+        "email" => email => [length(5..64), contains("@"), contains(".")],
+        "password" => password => [length(8..64)],
+        "age" => age => [range(12..127)]
     };
 }
 ```

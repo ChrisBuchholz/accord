@@ -2,6 +2,7 @@ use std::cmp::PartialEq;
 use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::clone::Clone;
+use std::ops::Range;
 
 /// rules!("some string".to_string(), [min(5)])
 pub fn min(min: usize) -> impl Fn(&String) -> ::ValidatorResult {
@@ -10,7 +11,7 @@ pub fn min(min: usize) -> impl Fn(&String) -> ::ValidatorResult {
             Ok(())
         } else {
             Err(::Invalid {
-                msg: "Must not be less than %1.".to_string(),
+                msg: "Must not contain less characters than %1.".to_string(),
                 args: vec![min.to_string()],
             })
         }
@@ -24,21 +25,21 @@ pub fn max(max: usize) -> impl Fn(&String) -> ::ValidatorResult {
             Ok(())
         } else {
             Err(::Invalid {
-                msg: "Must not be larger than %1.".to_string(),
+                msg: "Must not contain more characters than %1.".to_string(),
                 args: vec![max.to_string()],
             })
         }
     }
 }
 
-/// rules!("some string".to_string(), [length(5, 64)])
-pub fn length(mi: usize, ma: usize) -> impl Fn(&String) -> ::ValidatorResult {
+/// rules!("some string".to_string(), [length(5..64)])
+pub fn length(range: Range<usize>) -> impl Fn(&String) -> ::ValidatorResult {
     move |s: &String| {
-        match (min(mi)(s), max(ma)(s)) {
+        match (min(range.start)(s), max(range.end)(s)) {
             (Err(_), Err(_)) => {
                 Err(::Invalid {
-                    msg: "Must not be less than %1 and larger than %2.".to_string(),
-                    args: vec![mi.to_string(), ma.to_string()],
+                    msg: "Must not be less characters than %1 and not more than %2.".to_string(),
+                    args: vec![range.start.to_string(), range.end.to_string()],
                 })
             }
             (Err(e), _) => Err(e),
@@ -48,15 +49,15 @@ pub fn length(mi: usize, ma: usize) -> impl Fn(&String) -> ::ValidatorResult {
     }
 }
 
-/// rules!(25, [range(12, 127)])
-pub fn range<T: PartialOrd + Display + Clone>(a: T, b: T) -> impl Fn(&T) -> ::ValidatorResult {
+/// rules!(25, [range(12..127)])
+pub fn range<T: PartialOrd + Display + Clone>(range: Range<T>) -> impl Fn(&T) -> ::ValidatorResult {
     move |s: &T| {
-        if *s >= a && *s <= b {
+        if *s >= range.start && *s <= range.end {
             Ok(())
         } else {
             Err(::Invalid {
                 msg: "Must be in the range %1..%2.".to_string(),
-                args: vec![a.to_string(), b.to_string()],
+                args: vec![range.start.to_string(), range.end.to_string()],
             })
         }
     }

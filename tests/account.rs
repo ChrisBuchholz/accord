@@ -13,9 +13,9 @@ struct Account {
 impl Accord for Account {
     fn validate(&self) -> AccordResult {
         rules!{
-            "name" => self.name => [length(1, 64)],
-            "email" => self.email => [length(5, 64), contains("@"), contains(".")],
-            "age" => self.age => [range(12, 127)]
+            "name" => self.name => [length(1..64)],
+            "email" => self.email => [length(5..64), contains("@"), contains(".")],
+            "age" => self.age => [range(12..127)]
         }
     }
 }

@@ -12,8 +12,8 @@ struct Credentials {
 impl Accord for Credentials {
     fn validate(&self) -> AccordResult {
         rules!{
-            "email" => self.email => [length(5, 64), contains("@"), contains(".")],
-            "email" => self.password => [length(8, 64)]
+            "email" => self.email => [length(5..64), contains("@"), contains(".")],
+            "email" => self.password => [length(8..64)]
         }
     }
 }
