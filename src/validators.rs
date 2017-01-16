@@ -5,8 +5,8 @@ use std::clone::Clone;
 use std::ops::Range;
 
 /// rules!("some string".to_string(), [min(5)])
-pub fn min(min: usize) -> impl Fn(&String) -> ::ValidatorResult {
-    move |s: &String| {
+pub fn min(min: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
         if s.len() >= min {
             Ok(())
         } else {
@@ -15,12 +15,12 @@ pub fn min(min: usize) -> impl Fn(&String) -> ::ValidatorResult {
                 args: vec![min.to_string()],
             })
         }
-    }
+    })
 }
 
 /// rules!("some string".to_string(), [max(64)])
-pub fn max(max: usize) -> impl Fn(&String) -> ::ValidatorResult {
-    move |s: &String| {
+pub fn max(max: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
         if s.len() <= max {
             Ok(())
         } else {
@@ -29,12 +29,12 @@ pub fn max(max: usize) -> impl Fn(&String) -> ::ValidatorResult {
                 args: vec![max.to_string()],
             })
         }
-    }
+    })
 }
 
 /// rules!("some string".to_string(), [length(5..64)])
-pub fn length(range: Range<usize>) -> impl Fn(&String) -> ::ValidatorResult {
-    move |s: &String| {
+pub fn length(range: Range<usize>) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
         match (min(range.start)(s), max(range.end)(s)) {
             (Err(_), Err(_)) => {
                 Err(::Invalid {
@@ -46,12 +46,13 @@ pub fn length(range: Range<usize>) -> impl Fn(&String) -> ::ValidatorResult {
             (_, Err(e)) => Err(e),
             (_, _) => Ok(()),
         }
-    }
+    })
 }
 
 /// rules!(25, [range(12..127)])
-pub fn range<T: PartialOrd + Display + Clone>(range: Range<T>) -> impl Fn(&T) -> ::ValidatorResult {
-    move |s: &T| {
+pub fn range<T: 'static + PartialOrd + Display + Clone>(range: Range<T>)
+                                                        -> Box<Fn(&T) -> ::ValidatorResult> {
+    Box::new(move |s: &T| {
         if *s >= range.start && *s <= range.end {
             Ok(())
         } else {
@@ -60,12 +61,12 @@ pub fn range<T: PartialOrd + Display + Clone>(range: Range<T>) -> impl Fn(&T) ->
                 args: vec![range.start.to_string(), range.end.to_string()],
             })
         }
-    }
+    })
 }
 
 /// rules!("test@test.test".to_string(), [contains("@"), contains(".")])
-pub fn contains<'a>(needle: &'a str) -> impl Fn(&String) -> ::ValidatorResult {
-    move |s: &String| {
+pub fn contains(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
         if s.contains(needle) {
             Ok(())
         } else {
@@ -74,14 +75,14 @@ pub fn contains<'a>(needle: &'a str) -> impl Fn(&String) -> ::ValidatorResult {
                 args: vec![needle.to_string()],
             })
         }
-    }
+    })
 }
 
 /// rules!(25, [eq(25)])
-pub fn eq<T>(value: T) -> impl Fn(&T) -> ::ValidatorResult
+pub fn eq<T: 'static>(value: T) -> Box<Fn(&T) -> ::ValidatorResult>
     where T: PartialEq + Display
 {
-    move |s: &T| {
+    Box::new(move |s: &T| {
         if *s == value {
             Ok(())
         } else {
@@ -90,14 +91,14 @@ pub fn eq<T>(value: T) -> impl Fn(&T) -> ::ValidatorResult
                 args: vec![value.to_string()],
             })
         }
-    }
+    })
 }
 
 /// rules!(25, [either(vec![15, 25, 35])])
-pub fn either<T>(values: Vec<T>) -> impl Fn(&T) -> ::ValidatorResult
+pub fn either<T: 'static>(values: Vec<T>) -> Box<Fn(&T) -> ::ValidatorResult>
     where T: PartialEq + Display + Clone
 {
-    move |s: &T| {
+    Box::new(move |s: &T| {
         let x = values.iter().find(|x| *x == s);
         let r = x.is_some();
         if r == true {
@@ -111,7 +112,7 @@ pub fn either<T>(values: Vec<T>) -> impl Fn(&T) -> ::ValidatorResult
                 args: vec![list.to_string()],
             })
         }
-    }
+    })
 }
 
 #[cfg(test)]

@@ -5,9 +5,6 @@
 [![API Documentation](https://docs.rs/accord/badge.svg)](https://docs.rs/accord)
 [![codecov](https://codecov.io/gh/ChrisBuchholz/accord/branch/master/graph/badge.svg)](https://codecov.io/gh/ChrisBuchholz/accord)
 
-⚠️ Accord uses the unstable feature
-[conservative_impl_trait] and thus requires nightly until the feature lands in beta/stable.
-
 [contribute]: #Contributing
 [conservative_impl_trait]: https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md
 

@@ -4,7 +4,6 @@ version = "0.1.2"
 authors = ["Christoffer Buchholz <chris@chrisbuchholz.me>"]
 description = """
 Library for validating data according to rules like "contains", "length", "either", "range".
-Requires Rust nightly until conservative_impl_trait lands in stable.
 """
 documentation = "https://docs.rs/accord"
 repository = "https://github.com/ChrisBuchholz/accord"
