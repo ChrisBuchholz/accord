@@ -114,9 +114,9 @@ All pull requests are code reviewed and tested by the CI. Note that unless you
 explicitly state otherwise, any contribution intentionally submitted for
 inclusion in Accord by you shall be MIT License without any additional terms or conditions.
 
-*Thanks to [Rocket] for showing how to form a great contributing-section.*
+*Thanks to [Rocket][rocket-contrib] for showing how to form a great contributing-section.*
 
-[rocket]: https://github.com/SergioBenitez/Rocket/blob/master/README.md#contributing
+[rocket-contrib]: https://github.com/SergioBenitez/Rocket/blob/master/README.md#contributing
 
 ## License
 
