@@ -22,10 +22,52 @@ When the webserver is running, you can send a proper formed request to it with:
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X POST -d '{"name": "Test Test", "email": "test@test.test", "age": 25}' http://localhost:8000
 ```
 
-You can also try sending a request where the age is below 12. You will see
+You can also try sending a request where the age is below 12, there is only
+an empty string for a name and the email does not contain a @. You will see
 that the server responds with a 422 Unprocessable Entity and a JSON body
-that explains what is wrong:
+that explains exactly what is wrong:
 
 ```
-curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X POST -d '{"name": "Test Test", "email": "test@test.test", "age": 9}' http://localhost:8000
+curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X POST -d '{"name": "", "email": "testtesttest", "age": 9}' http://localhost:8000
 ```
+
+This is the returned JSON body:
+
+```
+[
+    {
+        "tag": "name",
+        "invalids": [
+            {
+                "msg": "Must not be less than %1.",
+                "args": ["1"]
+            }
+        ]
+    }, {
+        "tag": "email",
+        "invalids": [
+            {
+                "msg": "Must contain %1.",
+                "args": ["@"]
+            },
+            {
+                "msg": "Must contain %1.",
+                "args": ["."]
+            }
+        ]
+    }, {
+        "tag": "age",
+        "invalids": [
+            {
+                "msg": "Must be in the range %1..%2.",
+                "args": ["12","127"]
+            }
+        ]
+    }
+]
+```
+
+As you can see, this JSON body is easily translatable to other languages without
+having to deal with the variables like *12* and *@*, and can easily be parsed
+and shown to the user submitting the data in order to aid in fixing the
+problems.
