@@ -6,5 +6,4 @@ authors = ["Christoffer Buchholz <chris@chrisbuchholz.me>"]
 [dependencies]
 accord = { path = "../.." }
 serde = "0.8.21"
-serde_derive = "0.8.21"
 serde_json = "0.8.4"
