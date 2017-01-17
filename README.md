@@ -113,7 +113,10 @@ Building: `cargo build`
 
 Testing: `cargo test`
 
-You can also use the Makefile for doing more stuff in a simpler way.
+You can also use the Makefile for doing more stuff in a simpler way. The Makefile
+requires that you are using Rust via [rustup].
+
+[rustup]: https://www.rustup.rs
 
 * `make` will build and test Accord and all examples on both stable and nightly
 * `make build` will build everything on both stable and nightly
