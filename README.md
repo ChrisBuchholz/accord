@@ -113,6 +113,24 @@ Building: `cargo build`
 
 Testing: `cargo test`
 
+You can also use the Makefile for doing more stuff in a simpler way.
+
+* `make` will build and test Accord and all examples on both stable and nightly
+* `make build` will build everything on both stable and nightly
+* `make build-stable` will build everything on stable
+* `make build-nightly` will build everything on nightly
+* `make build-examples` will build examples on both stable and nightly
+* `make build-stable-examples`
+* `make build-nightly-examples`
+* `make build-nightly-example-<NAME-OF-EXAMPLE>`
+* `make test` will test everything on both stable and nightly
+* `make test-stable` will test everything on stable
+* `make test-nightly` will test everything on nightly
+* `make test-examples` will test examples on both stable and nightly
+* `make test-stable-examples`
+* `make test-nightly-examples`
+* `make test-nightly-example-<NAME-OF-EXAMPLE>`
+
 ## Contributing
 
 Contributions are absolutely, positively welcome and encouraged! Contributions
@@ -150,4 +168,5 @@ Accord is Copyright (c) 2017 Christoffer Buchholz. It is free software, and
 may be redistributed under the terms specified in the [LICENSE] file.
 
 [LICENSE]: /LICENSE
+
 
