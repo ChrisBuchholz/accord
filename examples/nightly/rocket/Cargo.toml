@@ -4,7 +4,7 @@ version = "0.0.1"
 authors = ["Christoffer Buchholz <chris@chrisbuchholz.me>"]
 
 [dependencies]
-accord = { path = "../.." }
+accord = { path = "../../.." }
 rocket = "0.1.4"
 rocket_codegen = "0.1.4"
 rocket_contrib = "0.1.4"

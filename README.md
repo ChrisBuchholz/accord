@@ -30,7 +30,7 @@ variable value *5*.
 
 [Serde]: https://serde.rs
 [Rocket]: https://rocket.rs
-[Rocket example]: https://github.com/ChrisBuchholz/accord/tree/master/examples/rocket
+[Rocket example]: https://github.com/ChrisBuchholz/accord/tree/master/examples/nightly/rocket
 
 ## Usage tl;dr:
 
@@ -101,7 +101,7 @@ fn main() {
 
 ## Documentation
 
-* [Examples]: Usage examples are available in the examples/ directory
+* [Examples]: Usage examples are available in the *examples/* directory
 * [API Documentation]: Documentation generated from the source code, comments and examples
 
 [examples]: https://github.com/ChrisBuchholz/accord/tree/master/examples
@@ -125,14 +125,16 @@ requires that you are using Rust via [rustup].
 * `make build-examples` will build examples on both stable and nightly
 * `make build-stable-examples`
 * `make build-nightly-examples`
-* `make build-nightly-example-<NAME-OF-EXAMPLE>`
+* `make build-stable-example-<NAME-OF-STABLE-EXAMPLE>`
+* `make build-nightly-example-<NAME-OF-NIGHTLY-EXAMPLE>`
 * `make test` will test everything on both stable and nightly
 * `make test-stable` will test everything on stable
 * `make test-nightly` will test everything on nightly
 * `make test-examples` will test examples on both stable and nightly
 * `make test-stable-examples`
 * `make test-nightly-examples`
-* `make test-nightly-example-<NAME-OF-EXAMPLE>`
+* `make test-stable-example-<NAME-OF-STABLE-EXAMPLE>`
+* `make test-nightly-example-<NAME-OF-NIGHTLY-EXAMPLE>`
 
 ## Contributing
 

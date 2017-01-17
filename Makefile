@@ -19,9 +19,9 @@ build-examples: build-stable-examples build-nightly-examples
 
 build-stable-examples: $(foreach x, $(STABLE_EXAMPLES), build-stable-example-$(x))
 
-build-stable-example-%:
+build-stable-example-%: $(CURDIR)/examples/stable/%
 	@echo "building stable example $*"
-	@cd $(CURDIR)/examples/$*; rustup run stable cargo build
+	@cd $(CURDIR)/examples/stable/$*; rustup run stable cargo build
 
 build-nightly-examples: $(foreach x, $(NIGHTLY_EXAMPLES), build-nightly-example-$(x))
 
@@ -29,9 +29,9 @@ build-nightly:
 	@echo "building nightly"
 	@rustup run nightly cargo build
 
-build-nightly-example-%:
+build-nightly-example-%: $(CURDIR)/examples/nightly/%
 	@echo "building nightly example $*"
-	@cd $(CURDIR)/examples/$*; rustup run nightly cargo build
+	@cd $(CURDIR)/examples/nightly/$*; rustup run nightly cargo build
 
 test-stable:
 	@echo "testing stable"
@@ -41,9 +41,9 @@ test-examples: test-stable-examples test-nightly-examples
 
 test-stable-examples: $(foreach x, $(STABLE_EXAMPLES), test-stable-example-$(x))
 
-test-stable-example-%:
+test-stable-example-%: $(CURDIR)/examples/stable/%
 	@echo "testing stable example $*"
-	@cd $(CURDIR)/examples/$*; rustup run stable cargo test
+	@cd $(CURDIR)/examples/stable/$*; rustup run stable cargo test
 
 test-nightly-examples: $(foreach x, $(NIGHTLY_EXAMPLES), test-nightly-example-$(x))
 
@@ -51,6 +51,6 @@ test-nightly:
 	@echo "testing nightly"
 	@rustup run nightly cargo test
 
-test-nightly-example-%:
+test-nightly-example-%: $(CURDIR)/examples/nightly/%
 	@echo "testing nightly example $*"
-	@cd $(CURDIR)/examples/$*; rustup run nightly cargo test
+	@cd $(CURDIR)/examples/nightly/$*; rustup run nightly cargo test

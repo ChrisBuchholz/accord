@@ -4,6 +4,6 @@ version = "0.1.0"
 authors = ["Christoffer Buchholz <chris@chrisbuchholz.me>"]
 
 [dependencies]
-accord = { path = "../.." }
+accord = { path = "../../.." }
 serde = "0.8.21"
 serde_json = "0.8.4"
