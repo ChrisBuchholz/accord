@@ -1,4 +1,4 @@
-#![feature(plugin)]
+#![feature(plugin, inclusive_range_syntax)]
 #![plugin(rocket_codegen)]
 
 #[macro_use]

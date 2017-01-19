@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "inclusive_range", feature(inclusive_range, inclusive_range_syntax))]
+
 extern crate serde;
 extern crate serde_json;
 
@@ -22,20 +24,34 @@ pub trait Accord {
 /// back using `rules!` single form, which can be done like so:
 ///
 /// ```
+/// #![cfg_attr(feature = "inclusive_range", feature(inclusive_range, inclusive_range_syntax))]
+///
 /// #[macro_use]
 /// extern crate accord;
 ///
 /// use accord::Error;
 /// use accord::validators::{length, contains, range};
 ///
+/// #[cfg(not(feature = "inclusive_range"))]
 /// fn main() {
 ///     let email = "test@test.test".to_string();
 ///     let password = "kfjsdkfjsdkfjfksjdfkdsfjs".to_string();
 ///     let age = 25;
 ///
-///     let _ = rules!(email, [length(5..64), contains("@"), contains(".")]);
-///     let _ = rules!(password, [length(8..64)]);
-///     let _ = rules!(age, [range(12..127)]);
+///     let _ = rules!(email, [length(5, 64), contains("@"), contains(".")]);
+///     let _ = rules!(password, [length(8, 64)]);
+///     let _ = rules!(age, [range(12, 127)]);
+/// }
+///
+/// #[cfg(feature = "inclusive_range")]
+/// fn main() {
+///     let email = "test@test.test".to_string();
+///     let password = "kfjsdkfjsdkfjfksjdfkdsfjs".to_string();
+///     let age = 25;
+///
+///     let _ = rules!(email, [length(5...64), contains("@"), contains(".")]);
+///     let _ = rules!(password, [length(8...64)]);
+///     let _ = rules!(age, [range(12...127)]);
 /// }
 /// ```
 ///
@@ -46,21 +62,37 @@ pub trait Accord {
 /// This makes it easy to distingues between all the `MultipleInvalid`s in the `Vector`.
 ///
 /// ```
+/// #![cfg_attr(feature = "inclusive_range", feature(inclusive_range, inclusive_range_syntax))]
+///
 /// #[macro_use]
 /// extern crate accord;
 ///
 /// use accord::{MultipleError, MultipleInvalid};
 /// use accord::validators::{length, contains, range};
 ///
+/// #[cfg(not(feature = "inclusive_range"))]
 /// fn main() {
 ///     let email = "test@test.test".to_string();
 ///     let password = "kfjsdkfjsdkfjfksjdfkdsfjs".to_string();
 ///     let age = 25;
 ///
 ///     let _ = rules!{
-///         "email" => email => [length(5..64), contains("@"), contains(".")],
-///         "password" => password => [length(8..64)],
-///         "age" => age => [range(12..127)]
+///         "email" => email => [length(5, 64), contains("@"), contains(".")],
+///         "password" => password => [length(8, 64)],
+///         "age" => age => [range(12, 127)]
+///     };
+/// }
+///
+/// #[cfg(feature = "inclusive_range")]
+/// fn main() {
+///     let email = "test@test.test".to_string();
+///     let password = "kfjsdkfjsdkfjfksjdfkdsfjs".to_string();
+///     let age = 25;
+///
+///     let _ = rules!{
+///         "email" => email => [length(5...64), contains("@"), contains(".")],
+///         "password" => password => [length(8...64)],
+///         "age" => age => [range(12...127)]
 ///     };
 /// }
 /// ```

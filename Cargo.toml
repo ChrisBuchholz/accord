@@ -12,6 +12,9 @@ keywords = ["accord", "rules", "library", "data", "validation"]
 license = "MIT"
 build = "build.rs"
 
+[features]
+inclusive_range = []
+
 [build-dependencies]
 serde_codegen = "0.8"
 

@@ -2,9 +2,11 @@ use std::cmp::PartialEq;
 use std::cmp::PartialOrd;
 use std::fmt::Display;
 use std::clone::Clone;
-use std::ops::Range;
 
-/// rules!("some string".to_string(), [min(5)])
+#[cfg(feature = "inclusive_range")]
+use std::ops::RangeInclusive;
+
+/// Enforce that a `String` is minimum `min` characters long.
 pub fn min(min: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
     Box::new(move |s: &String| {
         if s.len() >= min {
@@ -18,7 +20,7 @@ pub fn min(min: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
     })
 }
 
-/// rules!("some string".to_string(), [max(64)])
+/// Enforce that a `String` is maximum `max` characters long.
 pub fn max(max: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
     Box::new(move |s: &String| {
         if s.len() <= max {
@@ -32,14 +34,15 @@ pub fn max(max: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
     })
 }
 
-/// rules!("some string".to_string(), [length(5..64)])
-pub fn length(range: Range<usize>) -> Box<Fn(&String) -> ::ValidatorResult> {
+#[cfg(not(feature = "inclusive_range"))]
+/// Enforce that a string is minimum `mi` and maximum `ma` characters long.
+pub fn length(mi: usize, ma: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
     Box::new(move |s: &String| {
-        match (min(range.start)(s), max(range.end)(s)) {
+        match (min(mi)(s), max(ma)(s)) {
             (Err(_), Err(_)) => {
                 Err(::Invalid {
                     msg: "Must not be less characters than %1 and not more than %2.".to_string(),
-                    args: vec![range.start.to_string(), range.end.to_string()],
+                    args: vec![mi.to_string(), ma.to_string()],
                 })
             }
             (Err(e), _) => Err(e),
@@ -49,22 +52,67 @@ pub fn length(range: Range<usize>) -> Box<Fn(&String) -> ::ValidatorResult> {
     })
 }
 
-/// rules!(25, [range(12..127)])
-pub fn range<T: 'static + PartialOrd + Display + Clone>(range: Range<T>)
+#[cfg(feature = "inclusive_range")]
+/// Enforce that a string is minimum `mi` and maximum `ma` characters long.
+pub fn length(range: RangeInclusive<usize>) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
+        match range {
+            RangeInclusive::NonEmpty { ref start, ref end } => {
+                match (min(*start)(s), max(*end)(s)) {
+                    (Err(_), Err(_)) => {
+                        Err(::Invalid {
+                            msg: "Must not be less characters than %1 and not more than %2."
+                                .to_string(),
+                            args: vec![start.to_string(), end.to_string()],
+                        })
+                    }
+                    (Err(e), _) => Err(e),
+                    (_, Err(e)) => Err(e),
+                    (_, _) => Ok(()),
+                }
+            }
+            _ => panic!("range must be a RangeInclusive::NonEmpty"),
+        }
+    })
+}
+
+#[cfg(not(feature = "inclusive_range"))]
+pub fn range<T: 'static + PartialOrd + Display + Clone>(a: T,
+                                                        b: T)
                                                         -> Box<Fn(&T) -> ::ValidatorResult> {
     Box::new(move |s: &T| {
-        if *s >= range.start && *s <= range.end {
+        if *s >= a && *s <= b {
             Ok(())
         } else {
             Err(::Invalid {
                 msg: "Must be in the range %1..%2.".to_string(),
-                args: vec![range.start.to_string(), range.end.to_string()],
+                args: vec![a.to_string(), b.to_string()],
             })
         }
     })
 }
 
-/// rules!("test@test.test".to_string(), [contains("@"), contains(".")])
+#[cfg(feature = "inclusive_range")]
+pub fn range<T: 'static + PartialOrd + Display + Clone>(range: RangeInclusive<T>)
+                                                        -> Box<Fn(&T) -> ::ValidatorResult> {
+    Box::new(move |s: &T| {
+        match range {
+            RangeInclusive::NonEmpty { ref start, ref end } => {
+                if *s >= *start && *s <= *end {
+                    Ok(())
+                } else {
+                    Err(::Invalid {
+                        msg: "Must be in the range %1..%2.".to_string(),
+                        args: vec![start.to_string(), end.to_string()],
+                    })
+                }
+            } 
+            _ => panic!("range must be a RangeInclusive::NonEmpty"),
+        }
+    })
+}
+
+/// Enforce that a string must contain `needle`.
 pub fn contains(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult> {
     Box::new(move |s: &String| {
         if s.contains(needle) {
@@ -78,7 +126,7 @@ pub fn contains(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult> {
     })
 }
 
-/// rules!(25, [eq(25)])
+/// Enforce that `T` must equal `value`.
 pub fn eq<T: 'static>(value: T) -> Box<Fn(&T) -> ::ValidatorResult>
     where T: PartialEq + Display
 {
@@ -94,7 +142,7 @@ pub fn eq<T: 'static>(value: T) -> Box<Fn(&T) -> ::ValidatorResult>
     })
 }
 
-/// rules!(25, [either(vec![15, 25, 35])])
+/// Enforce that `T` equals any of the values in `values`.
 pub fn either<T: 'static>(values: Vec<T>) -> Box<Fn(&T) -> ::ValidatorResult>
     where T: PartialEq + Display + Clone
 {
@@ -120,20 +168,42 @@ mod tests {
     use validators::{length, range};
 
     #[test]
+    #[cfg(feature = "inclusive_range")]
     fn test_length() {
-        assert!(length(3..5)(&"12".to_string()).is_err());
-        assert!(length(3..5)(&"123".to_string()).is_ok());
-        assert!(length(3..5)(&"1234".to_string()).is_ok());
-        assert!(length(3..5)(&"12345".to_string()).is_ok());
-        assert!(length(3..5)(&"123456".to_string()).is_err());
+        assert!(length(3...5)(&"12".to_string()).is_err());
+        assert!(length(3...5)(&"123".to_string()).is_ok());
+        assert!(length(3...5)(&"1234".to_string()).is_ok());
+        assert!(length(3...5)(&"12345".to_string()).is_ok());
+        assert!(length(3...5)(&"123456".to_string()).is_err());
     }
 
     #[test]
+    #[cfg(not(feature = "inclusive_range"))]
+    fn test_length() {
+        assert!(length(3, 5)(&"12".to_string()).is_err());
+        assert!(length(3, 5)(&"123".to_string()).is_ok());
+        assert!(length(3, 5)(&"1234".to_string()).is_ok());
+        assert!(length(3, 5)(&"12345".to_string()).is_ok());
+        assert!(length(3, 5)(&"123456".to_string()).is_err());
+    }
+
+    #[test]
+    #[cfg(feature = "inclusive_range")]
     fn test_range() {
-        assert!(range(12..127)(&11).is_err());
-        assert!(range(12..127)(&12).is_ok());
-        assert!(range(12..127)(&50).is_ok());
-        assert!(range(12..127)(&127).is_ok());
-        assert!(range(12..127)(&128).is_err());
+        assert!(range(12...127)(&11).is_err());
+        assert!(range(12...127)(&12).is_ok());
+        assert!(range(12...127)(&50).is_ok());
+        assert!(range(12...127)(&127).is_ok());
+        assert!(range(12...127)(&128).is_err());
+    }
+
+    #[test]
+    #[cfg(not(feature = "inclusive_range"))]
+    fn test_range() {
+        assert!(range(12, 127)(&11).is_err());
+        assert!(range(12, 127)(&12).is_ok());
+        assert!(range(12, 127)(&50).is_ok());
+        assert!(range(12, 127)(&127).is_ok());
+        assert!(range(12, 127)(&128).is_err());
     }
 }

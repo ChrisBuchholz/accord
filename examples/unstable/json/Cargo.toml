@@ -1,9 +1,9 @@
 [package]
-name = "json-accord-stable-example"
+name = "json-accord-nightly-example"
 version = "0.1.0"
 authors = ["Christoffer Buchholz <chris@chrisbuchholz.me>"]
 
 [dependencies]
-accord = { path = "../../.." }
+accord = { path = "../../..", features = ["inclusive_range"] }
 serde = "0.8.21"
 serde_json = "0.8.4"

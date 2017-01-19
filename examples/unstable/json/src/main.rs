@@ -1,3 +1,5 @@
+#![feature(inclusive_range_syntax)]
+
 #[macro_use]
 extern crate accord;
 extern crate serde;
@@ -15,9 +17,9 @@ struct Account {
 impl Accord for Account {
     fn validate(&self) -> AccordResult {
         rules!{
-            "name" => self.name => [length(1, 64)],
-            "email" => self.email => [length(5, 64), contains("@"), contains(".")],
-            "age" => self.age => [range(12, 127)]
+            "name" => self.name => [length(1...64)],
+            "email" => self.email => [length(5...64), contains("@"), contains(".")],
+            "age" => self.age => [range(12...127)]
         }
     }
 }
@@ -32,9 +34,10 @@ fn main() {
     // You can use the `rules!` macro on any value.
     // This way of using the the `rules!` macro returns a
     // `Result<(), Error>`.
-    let _ = rules!(account.name, [length(1, 64)]);
-    let _ = rules!(account.email, [length(5, 64), contains("@"), contains(".")]);
-    let _ = rules!(account.age, [range(12, 127)]);
+    let _ = rules!(account.name, [length(1...64)]);
+    let _ = rules!(account.email,
+                   [length(5...64), contains("@"), contains(".")]);
+    let _ = rules!(account.age, [range(12...127)]);
 
     // You can also use the collection form of the `rules!` macro
     // again using any value you'd like.
@@ -44,9 +47,9 @@ fn main() {
     // are called tags and are used to distingues between the sets of errors
     // that are returned.
     let _ = rules!{
-        "name" => account.name => [length(1, 64)],
-        "email" => account.email => [length(5, 64), contains("@"), contains(".")],
-        "age" => account.age => [range(12, 127)]
+        "name" => account.name => [length(1...64)],
+        "email" => account.email => [length(5...64), contains("@"), contains(".")],
+        "age" => account.age => [range(12...127)]
     };
 
     // And finally, since our `Account` has implemented the

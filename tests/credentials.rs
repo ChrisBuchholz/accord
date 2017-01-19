@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "inclusive_range", feature(inclusive_range_syntax))]
+
 #[macro_use]
 extern crate accord;
 
@@ -10,10 +12,19 @@ struct Credentials {
 }
 
 impl Accord for Credentials {
+    #[cfg(not(feature = "inclusive_range"))]
     fn validate(&self) -> AccordResult {
         rules!{
-            "email" => self.email => [length(5..64), contains("@"), contains(".")],
-            "email" => self.password => [length(8..64)]
+            "email" => self.email => [length(5, 64), contains("@"), contains(".")],
+            "email" => self.password => [length(8, 64)]
+        }
+    }
+
+    #[cfg(feature = "inclusive_range")]
+    fn validate(&self) -> AccordResult {
+        rules!{
+            "email" => self.email => [length(5...64), contains("@"), contains(".")],
+            "email" => self.password => [length(8...64)]
         }
     }
 }

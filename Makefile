@@ -1,21 +1,22 @@
 STABLE_EXAMPLES = 	json
-NIGHTLY_EXAMPLES =	rocket
+UNSTABLE_EXAMPLES =	json rocket
+UNSTABLE_FEATURES = inclusive_range
 
 all: build test
 
 build: build-stable \
-	build-nightly \
+	build-unstable \
 	build-examples
 
 test: test-stable \
-	test-nightly \
+	test-unstable \
 	test-examples
 
 build-stable:
-	@echo "building stable"
+	@echo "building on stable"
 	@rustup run stable cargo build
 
-build-examples: build-stable-examples build-nightly-examples
+build-examples: build-stable-examples build-unstable-examples
 
 build-stable-examples: $(foreach x, $(STABLE_EXAMPLES), build-stable-example-$(x))
 
@@ -23,21 +24,23 @@ build-stable-example-%: $(CURDIR)/examples/stable/%
 	@echo "building stable example $*"
 	@cd $(CURDIR)/examples/stable/$*; rustup run stable cargo build
 
-build-nightly-examples: $(foreach x, $(NIGHTLY_EXAMPLES), build-nightly-example-$(x))
+build-unstable-examples: $(foreach x, $(UNSTABLE_EXAMPLES), build-unstable-example-$(x))
 
-build-nightly:
-	@echo "building nightly"
+build-unstable:
+	@echo "building on nightly"
 	@rustup run nightly cargo build
+	@echo "building on nightly with unstable features: $(UNSTABLE_FEATURES)"
+	@rustup run nightly cargo build --features $(UNSTABLE_FEATURES)
 
-build-nightly-example-%: $(CURDIR)/examples/nightly/%
-	@echo "building nightly example $*"
-	@cd $(CURDIR)/examples/nightly/$*; rustup run nightly cargo build
+build-unstable-example-%: $(CURDIR)/examples/unstable/%
+	@echo "building unstable example $*"
+	@cd $(CURDIR)/examples/unstable/$*; rustup run nightly cargo build
 
 test-stable:
 	@echo "testing stable"
 	@rustup run stable cargo test
 
-test-examples: test-stable-examples test-nightly-examples
+test-examples: test-stable-examples test-unstable-examples
 
 test-stable-examples: $(foreach x, $(STABLE_EXAMPLES), test-stable-example-$(x))
 
@@ -45,12 +48,14 @@ test-stable-example-%: $(CURDIR)/examples/stable/%
 	@echo "testing stable example $*"
 	@cd $(CURDIR)/examples/stable/$*; rustup run stable cargo test
 
-test-nightly-examples: $(foreach x, $(NIGHTLY_EXAMPLES), test-nightly-example-$(x))
+test-unstable-examples: $(foreach x, $(UNSTABLE_EXAMPLES), test-unstable-example-$(x))
 
-test-nightly:
-	@echo "testing nightly"
+test-unstable:
+	@echo "testing on nightly"
 	@rustup run nightly cargo test
+	@echo "testing on nightly with unstable features: $(UNSTABLE_FEATURES)"
+	@rustup run nightly cargo test --features $(UNSTABLE_FEATURES)
 
-test-nightly-example-%: $(CURDIR)/examples/nightly/%
-	@echo "testing nightly example $*"
-	@cd $(CURDIR)/examples/nightly/$*; rustup run nightly cargo test
+test-unstable-example-%: $(CURDIR)/examples/unstable/%
+	@echo "testing unstable example $*"
+	@cd $(CURDIR)/examples/unstable/$*; rustup run nightly cargo test

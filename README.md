@@ -30,7 +30,7 @@ variable value *5*.
 
 [Serde]: https://serde.rs
 [Rocket]: https://rocket.rs
-[Rocket example]: https://github.com/ChrisBuchholz/accord/tree/master/examples/nightly/rocket
+[Rocket example]: https://github.com/ChrisBuchholz/accord/tree/master/examples/unstable/rocket
 
 ## Usage tl;dr:
 
@@ -52,9 +52,9 @@ struct Account {
 impl Accord for Account {
     fn validate(&self) -> AccordResult {
         rules!{
-            "name" => self.name => [length(1..64)],
-            "email" => self.email => [length(5..64), contains("@"), contains(".")],
-            "age" => self.age => [range(12..127)]
+            "name" => self.name => [length(1, 64)],
+            "email" => self.email => [length(5, 64), contains("@"), contains(".")],
+            "age" => self.age => [range(12, 127)]
         }
     }
 }
@@ -69,9 +69,9 @@ fn main() {
     // You can use the `rules!` macro on any value.
     // This way of using the the `rules!` macro returns a
     // `Result<(), Error>`.
-    let _ = rules!(account.name, [length(1..64)]);
-    let _ = rules!(account.email, [length(5..64), contains("@"), contains(".")]);
-    let _ = rules!(account.age, [range(12..127)]);
+    let _ = rules!(account.name, [length(1, 64)]);
+    let _ = rules!(account.email, [length(5, 64), contains("@"), contains(".")]);
+    let _ = rules!(account.age, [range(12, 127)]);
 
     // You can also use the collection form of the `rules!` macro
     // again using any value you'd like.
@@ -81,9 +81,9 @@ fn main() {
     // are called tags and are used to distingues between the sets of errors
     // that are returned.
     let _ = rules!{
-        "name" => account.name => [length(1..64)],
-        "email" => account.email => [length(5..64), contains("@"), contains(".")],
-        "age" => account.age => [range(12..127)]
+        "name" => account.name => [length(1, 64)],
+        "email" => account.email => [length(5, 64), contains("@"), contains(".")],
+        "age" => account.age => [range(12, 127)]
     };
 
     // And finally, since our `Account` has implemented the
@@ -109,32 +109,53 @@ fn main() {
 
 ## Building locally
 
+### Stable
+
 Building: `cargo build`
 
 Testing: `cargo test`
 
-You can also use the Makefile for doing more stuff in a simpler way. The Makefile
+### Nightly + unstable features
+
+Make sure you have an up-to-date version of rust nightly installed.
+
+Building: `cargo build`
+
+Testing: `cargo test`
+
+You can add `--features FEATURES TO ENABLE` to both `cargo build` and `cargo test` to build or test unstable features. The unstable features currently supported are:
+
+* `inclusive_range` [RFC#1192] which enables one to use the `length` and `range` validators with [inclusive ranges] instead of `a, b`-variables, as in the example above. An example crate using inclusive ranges can be found [here][inclusive_range_example].
+
+[RFC#1192]: https://github.com/rust-lang/rfcs/blob/master/text/1192-inclusive-ranges.md
+[inclusive ranges]: https://doc.rust-lang.org/std/ops/enum.RangeInclusive.html
+[inclusive_range_example]: https://github.com/ChrisBuchholz/accord/tree/master/examples/unstable/json
+
+### Make
+
+You can also use [make] for doing more stuff in a simpler way. The Makefile
 requires that you are using Rust via [rustup].
 
+[make]: https://www.gnu.org/software/make/
 [rustup]: https://www.rustup.rs
 
-* `make` will build and test Accord and all examples on both stable and nightly
+* `make` will build and test Accord and all examples on both stable and nightly, on nightly both with and without unstable features
 * `make build` will build everything on both stable and nightly
 * `make build-stable` will build everything on stable
-* `make build-nightly` will build everything on nightly
+* `make build-unstable` will build everything on nightly with and without unstable features
 * `make build-examples` will build examples on both stable and nightly
 * `make build-stable-examples`
-* `make build-nightly-examples`
+* `make build-unstable-examples`
 * `make build-stable-example-<NAME-OF-STABLE-EXAMPLE>`
-* `make build-nightly-example-<NAME-OF-NIGHTLY-EXAMPLE>`
-* `make test` will test everything on both stable and nightly
+* `make build-unstable-example-<NAME-OF-UNSTABLE-EXAMPLE>`
+* `make test` will test everything on both stable and nightly, on nightly with and without unstable features
 * `make test-stable` will test everything on stable
-* `make test-nightly` will test everything on nightly
+* `make test-unstable` will test everything on nightly with and without unstable features
 * `make test-examples` will test examples on both stable and nightly
 * `make test-stable-examples`
-* `make test-nightly-examples`
+* `make test-unstable-examples`
 * `make test-stable-example-<NAME-OF-STABLE-EXAMPLE>`
-* `make test-nightly-example-<NAME-OF-NIGHTLY-EXAMPLE>`
+* `make test-unstable-example-<NAME-OF-UNSTABLE-EXAMPLE>`
 
 ## Contributing
 
@@ -173,5 +194,6 @@ Accord is Copyright (c) 2017 Christoffer Buchholz. It is free software, and
 may be redistributed under the terms specified in the [LICENSE] file.
 
 [LICENSE]: /LICENSE
+
 
 
