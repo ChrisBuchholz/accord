@@ -3,8 +3,8 @@
 #[macro_use]
 extern crate accord;
 
-use accord::{Accord, Result as AccordResult, MultipleError, MultipleInvalid};
-use accord::validators::{length, contains};
+use accord::{Accord, Result as AccordResult};
+use accord::validators::{length, contains, not_contain_any};
 
 struct Credentials {
     pub email: String,
@@ -16,7 +16,7 @@ impl Accord for Credentials {
     fn validate(&self) -> AccordResult {
         rules!{
             "email" => self.email => [length(5, 64), contains("@"), contains(".")],
-            "email" => self.password => [length(8, 64)]
+            "password" => self.password => [not_contain_any(&["1234", "admin", "password"])]
         }
     }
 
@@ -24,7 +24,7 @@ impl Accord for Credentials {
     fn validate(&self) -> AccordResult {
         rules!{
             "email" => self.email => [length(5...64), contains("@"), contains(".")],
-            "email" => self.password => [length(8...64)]
+            "password" => self.password => [not_contain_any(&["1234", "admin", "password"])]
         }
     }
 }
@@ -38,7 +38,7 @@ fn main() {
 
     let b = Credentials {
         email: "t".to_string(),
-        password: "l".to_string(),
+        password: "admin1234password".to_string(),
     };
 
     assert!(a.validate().is_ok());
