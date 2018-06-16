@@ -126,6 +126,21 @@ pub fn contains(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult> {
     })
 }
 
+/// Enforce that a string contains only characters in `accepted`
+pub fn contain_only(accepted: &'static [char]) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
+        for c in s.chars() {
+			if !accepted.contains(&c) {
+				return Err(::Invalid {
+					msg: "Must not contain %1.".to_string(),
+					args: vec![c.to_string()],
+				});
+			}
+		}
+		Ok(())
+    })
+}
+
 /// Enforce that a string must not contain `needle`.
 pub fn not_contain(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult> {
     Box::new(move |s: &String| {
