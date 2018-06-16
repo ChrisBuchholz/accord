@@ -140,6 +140,21 @@ pub fn not_contain(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult
     })
 }
 
+/// Enforce that a string must not contain any of `needles`.
+pub fn not_contain_any(needles: &'static [&'static str]) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
+        for needle in needles {
+			if s.contains(needle) {
+				return Err(::Invalid {
+					msg: "Must not contain %1.".to_string(),
+					args: vec![needle.to_string()],
+				});
+			}
+		}
+		Ok(())
+    })
+}
+
 /// Enforce that `T` must equal `value`.
 pub fn eq<T: 'static>(value: T) -> Box<Fn(&T) -> ::ValidatorResult>
     where T: PartialEq + Display
