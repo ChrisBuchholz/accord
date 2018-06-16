@@ -111,7 +111,8 @@ macro_rules! rules {
         }
     }};
     ( $( $a:expr => $b:expr => [ $( $c:expr ),* ] ),* ) => {{
-        let multiple_invalids = vec![$(MultipleInvalid {
+        use accord::{MultipleInvalid, MultipleError};
+		let multiple_invalids = vec![$(MultipleInvalid {
                 tag: $a.to_string(),
                 invalids: [$($c(&$b)),*]
                     .iter()
