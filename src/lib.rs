@@ -2,10 +2,13 @@
 
 extern crate serde;
 extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
 
 pub mod validators;
+pub mod serde_types;
 
-include!(concat!(env!("OUT_DIR"), "/serde_types.rs"));
+pub use serde_types::*;
 
 pub type ValidatorResult = std::result::Result<(), Invalid>;
 
