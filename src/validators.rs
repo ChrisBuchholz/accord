@@ -52,6 +52,28 @@ pub fn length(mi: usize, ma: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
     })
 }
 
+#[cfg(not(feature = "inclusive_range"))]
+/// Enforce that a string is minimum `mi` and maximum `ma` characters long if it is present. Always ok if not present.
+pub fn length_if_present(mi: usize, ma: usize) -> Box<Fn(&Option<String>) -> ::ValidatorResult> {
+    Box::new(move |s: &Option<String>| {
+		if s.is_none() {
+			return Ok(());
+		}
+		let s = s.as_ref().unwrap();
+        match (min(mi)(s), max(ma)(s)) {
+            (Err(_), Err(_)) => {
+                Err(::Invalid {
+                    msg: "Must not be less characters than %1 and not more than %2.".to_string(),
+                    args: vec![mi.to_string(), ma.to_string()],
+                })
+            }
+            (Err(e), _) => Err(e),
+            (_, Err(e)) => Err(e),
+            (_, _) => Ok(()),
+        }
+    })
+}
+
 #[cfg(feature = "inclusive_range")]
 /// Enforce that a string is minimum `mi` and maximum `ma` characters long.
 pub fn length(range: RangeInclusive<usize>) -> Box<Fn(&String) -> ::ValidatorResult> {
@@ -75,6 +97,35 @@ pub fn length(range: RangeInclusive<usize>) -> Box<Fn(&String) -> ::ValidatorRes
         }
     })
 }
+
+#[cfg(feature = "inclusive_range")]
+/// Enforce that a string is minimum `mi` and maximum `ma` characters long if it is present. Always ok if not present.
+pub fn length_if_present(range: RangeInclusive<usize>) -> Box<Fn(&Option<String>) -> ::ValidatorResult> {
+    Box::new(move |s: &Option<String>| {
+		if s.is_none() {
+			return Ok(());
+		}
+		let s = s.as_ref().unwrap();
+        match range {
+            RangeInclusive::NonEmpty { ref start, ref end } => {
+                match (min(*start)(s), max(*end)(s)) {
+                    (Err(_), Err(_)) => {
+                        Err(::Invalid {
+                            msg: "Must not be less characters than %1 and not more than %2."
+                                .to_string(),
+                            args: vec![start.to_string(), end.to_string()],
+                        })
+                    }
+                    (Err(e), _) => Err(e),
+                    (_, Err(e)) => Err(e),
+                    (_, _) => Ok(()),
+                }
+            }
+            _ => panic!("range must be a RangeInclusive::NonEmpty"),
+        }
+    })
+}
+
 
 #[cfg(not(feature = "inclusive_range"))]
 pub fn range<T: 'static + PartialOrd + Display + Clone>(a: T,
