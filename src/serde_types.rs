@@ -2,6 +2,7 @@
 pub struct Invalid {
     pub msg: String,
     pub args: Vec<String>,
+	pub human_readable: String
 }
 
 #[derive(Debug, Clone, Serialize)]

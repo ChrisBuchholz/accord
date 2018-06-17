@@ -13,8 +13,9 @@ pub fn min(min: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
             Ok(())
         } else {
             Err(::Invalid {
-                msg: "Must not contain less characters than %1.".to_string(),
-                args: vec![min.to_string()],
+                msg: "Must contain more than %1 characters".to_string(),
+				args: vec![min.to_string()],
+				human_readable: format!("Must contain more than {} characters", min)
             })
         }
     })
@@ -29,6 +30,7 @@ pub fn max(max: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
             Err(::Invalid {
                 msg: "Must not contain more characters than %1.".to_string(),
                 args: vec![max.to_string()],
+				human_readable: format!("Must contain less than {} characters", max)
             })
         }
     })
@@ -43,6 +45,7 @@ pub fn length(mi: usize, ma: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
                 Err(::Invalid {
                     msg: "Must not be less characters than %1 and not more than %2.".to_string(),
                     args: vec![mi.to_string(), ma.to_string()],
+					human_readable: format!("Must contain between {} and {} characters", mi, ma - 1)
                 })
             }
             (Err(e), _) => Err(e),
@@ -65,6 +68,7 @@ pub fn length_if_present(mi: usize, ma: usize) -> Box<Fn(&Option<String>) -> ::V
                 Err(::Invalid {
                     msg: "Must not be less characters than %1 and not more than %2.".to_string(),
                     args: vec![mi.to_string(), ma.to_string()],
+					human_readable: format!("Must contain between {} and {} characters", mi, ma - 1)
                 })
             }
             (Err(e), _) => Err(e),
@@ -86,6 +90,7 @@ pub fn length(range: RangeInclusive<usize>) -> Box<Fn(&String) -> ::ValidatorRes
                             msg: "Must not be less characters than %1 and not more than %2."
                                 .to_string(),
                             args: vec![start.to_string(), end.to_string()],
+							human_readable: format!("Must contain between {} and {} characters", mi, ma)
                         })
                     }
                     (Err(e), _) => Err(e),
@@ -114,6 +119,7 @@ pub fn length_if_present(range: RangeInclusive<usize>) -> Box<Fn(&Option<String>
                             msg: "Must not be less characters than %1 and not more than %2."
                                 .to_string(),
                             args: vec![start.to_string(), end.to_string()],
+							human_readable: format!("Must contain between {} and {} characters", start, end)
                         })
                     }
                     (Err(e), _) => Err(e),
@@ -138,6 +144,7 @@ pub fn range<T: 'static + PartialOrd + Display + Clone>(a: T,
             Err(::Invalid {
                 msg: "Must be in the range %1..%2.".to_string(),
                 args: vec![a.to_string(), b.to_string()],
+				human_readable: format!("Must be between {} and {}", a, b)
             })
         }
     })
@@ -155,6 +162,7 @@ pub fn range<T: 'static + PartialOrd + Display + Clone>(range: RangeInclusive<T>
                     Err(::Invalid {
                         msg: "Must be in the range %1..%2.".to_string(),
                         args: vec![start.to_string(), end.to_string()],
+						human_readable: format!("Must be between {} and {}", start, end)
                     })
                 }
             } 
@@ -172,6 +180,7 @@ pub fn contains(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult> {
             Err(::Invalid {
                 msg: "Must contain %1.".to_string(),
                 args: vec![needle.to_string()],
+				human_readable: format!("Must contain '{}'", needle)
             })
         }
     })
@@ -185,6 +194,7 @@ pub fn contain_only(accepted: &'static [char]) -> Box<Fn(&String) -> ::Validator
 				return Err(::Invalid {
 					msg: "Must not contain %1.".to_string(),
 					args: vec![c.to_string()],
+					human_readable: format!("Must not contain '{}'", c)
 				});
 			}
 		}
@@ -211,6 +221,7 @@ pub fn not_contain(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult
             Err(::Invalid {
                 msg: "Must not contain %1.".to_string(),
                 args: vec![needle.to_string()],
+				human_readable: format!("Must not contain '{}'", needle)
             })
         }
     })
@@ -224,6 +235,7 @@ pub fn not_contain_any(needles: &'static [&'static str]) -> Box<Fn(&String) -> :
 				return Err(::Invalid {
 					msg: "Must not contain %1.".to_string(),
 					args: vec![needle.to_string()],
+					human_readable: format!("Must not contain '{}'", needle)
 				});
 			}
 		}
@@ -242,6 +254,7 @@ pub fn eq<T: 'static>(value: T) -> Box<Fn(&T) -> ::ValidatorResult>
             Err(::Invalid {
                 msg: "Does not equal %1.".to_string(),
                 args: vec![value.to_string()],
+				human_readable: format!("Does not equal '{}'", value)
             })
         }
     })
@@ -263,6 +276,7 @@ pub fn either<T: 'static>(values: Vec<T>) -> Box<Fn(&T) -> ::ValidatorResult>
             Err(::Invalid {
                 msg: "Must be one of %1.".to_string(),
                 args: vec![list.to_string()],
+				human_readable: format!("Must be one of {}", list.to_string())
             })
         }
     })
