@@ -13,8 +13,9 @@ pub fn min(min: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
             Ok(())
         } else {
             Err(::Invalid {
-                msg: "Must not contain less characters than %1.".to_string(),
-                args: vec![min.to_string()],
+                msg: "Must contain more than %1 characters".to_string(),
+				args: vec![min.to_string()],
+				human_readable: format!("Must contain more than {} characters", min)
             })
         }
     })
@@ -29,6 +30,7 @@ pub fn max(max: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
             Err(::Invalid {
                 msg: "Must not contain more characters than %1.".to_string(),
                 args: vec![max.to_string()],
+				human_readable: format!("Must contain less than {} characters", max)
             })
         }
     })
@@ -43,6 +45,30 @@ pub fn length(mi: usize, ma: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
                 Err(::Invalid {
                     msg: "Must not be less characters than %1 and not more than %2.".to_string(),
                     args: vec![mi.to_string(), ma.to_string()],
+					human_readable: format!("Must contain between {} and {} characters", mi, ma - 1)
+                })
+            }
+            (Err(e), _) => Err(e),
+            (_, Err(e)) => Err(e),
+            (_, _) => Ok(()),
+        }
+    })
+}
+
+#[cfg(not(feature = "inclusive_range"))]
+/// Enforce that a string is minimum `mi` and maximum `ma` characters long if it is present. Always ok if not present.
+pub fn length_if_present(mi: usize, ma: usize) -> Box<Fn(&Option<String>) -> ::ValidatorResult> {
+    Box::new(move |s: &Option<String>| {
+		if s.is_none() {
+			return Ok(());
+		}
+		let s = s.as_ref().unwrap();
+        match (min(mi)(s), max(ma)(s)) {
+            (Err(_), Err(_)) => {
+                Err(::Invalid {
+                    msg: "Must not be less characters than %1 and not more than %2.".to_string(),
+                    args: vec![mi.to_string(), ma.to_string()],
+					human_readable: format!("Must contain between {} and {} characters", mi, ma - 1)
                 })
             }
             (Err(e), _) => Err(e),
@@ -64,6 +90,7 @@ pub fn length(range: RangeInclusive<usize>) -> Box<Fn(&String) -> ::ValidatorRes
                             msg: "Must not be less characters than %1 and not more than %2."
                                 .to_string(),
                             args: vec![start.to_string(), end.to_string()],
+							human_readable: format!("Must contain between {} and {} characters", mi, ma)
                         })
                     }
                     (Err(e), _) => Err(e),
@@ -76,6 +103,36 @@ pub fn length(range: RangeInclusive<usize>) -> Box<Fn(&String) -> ::ValidatorRes
     })
 }
 
+#[cfg(feature = "inclusive_range")]
+/// Enforce that a string is minimum `mi` and maximum `ma` characters long if it is present. Always ok if not present.
+pub fn length_if_present(range: RangeInclusive<usize>) -> Box<Fn(&Option<String>) -> ::ValidatorResult> {
+    Box::new(move |s: &Option<String>| {
+		if s.is_none() {
+			return Ok(());
+		}
+		let s = s.as_ref().unwrap();
+        match range {
+            RangeInclusive::NonEmpty { ref start, ref end } => {
+                match (min(*start)(s), max(*end)(s)) {
+                    (Err(_), Err(_)) => {
+                        Err(::Invalid {
+                            msg: "Must not be less characters than %1 and not more than %2."
+                                .to_string(),
+                            args: vec![start.to_string(), end.to_string()],
+							human_readable: format!("Must contain between {} and {} characters", start, end)
+                        })
+                    }
+                    (Err(e), _) => Err(e),
+                    (_, Err(e)) => Err(e),
+                    (_, _) => Ok(()),
+                }
+            }
+            _ => panic!("range must be a RangeInclusive::NonEmpty"),
+        }
+    })
+}
+
+
 #[cfg(not(feature = "inclusive_range"))]
 pub fn range<T: 'static + PartialOrd + Display + Clone>(a: T,
                                                         b: T)
@@ -87,6 +144,7 @@ pub fn range<T: 'static + PartialOrd + Display + Clone>(a: T,
             Err(::Invalid {
                 msg: "Must be in the range %1..%2.".to_string(),
                 args: vec![a.to_string(), b.to_string()],
+				human_readable: format!("Must be between {} and {}", a, b)
             })
         }
     })
@@ -104,6 +162,7 @@ pub fn range<T: 'static + PartialOrd + Display + Clone>(range: RangeInclusive<T>
                     Err(::Invalid {
                         msg: "Must be in the range %1..%2.".to_string(),
                         args: vec![start.to_string(), end.to_string()],
+						human_readable: format!("Must be between {} and {}", start, end)
                     })
                 }
             } 
@@ -121,8 +180,66 @@ pub fn contains(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult> {
             Err(::Invalid {
                 msg: "Must contain %1.".to_string(),
                 args: vec![needle.to_string()],
+				human_readable: format!("Must contain '{}'", needle)
             })
         }
+    })
+}
+
+/// Enforce that a string contains only characters in `accepted`
+pub fn contain_only(accepted: &'static [char]) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
+        for c in s.chars() {
+			if !accepted.contains(&c) {
+				return Err(::Invalid {
+					msg: "Must not contain %1.".to_string(),
+					args: vec![c.to_string()],
+					human_readable: format!("Must not contain '{}'", c)
+				});
+			}
+		}
+		Ok(())
+    })
+}
+
+/// Convenience function; 0-9, A-z
+pub fn alphanumeric() -> Box<Fn(&String) -> ::ValidatorResult> {
+	contain_only(&['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'])
+}
+
+/// Convenience function; Alphanumeric & underscore.
+pub fn alphanumeric_dashes() -> Box<Fn(&String) -> ::ValidatorResult> {
+	contain_only(&['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '_', '-'])
+}
+
+/// Enforce that a string must not contain `needle`.
+pub fn not_contain(needle: &'static str) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
+        if !s.contains(needle) {
+            Ok(())
+        } else {
+            Err(::Invalid {
+                msg: "Must not contain %1.".to_string(),
+                args: vec![needle.to_string()],
+				human_readable: format!("Must not contain '{}'", needle)
+            })
+        }
+    })
+}
+
+/// Enforce that a string must not contain any of `needles`.
+pub fn not_contain_any(needles: &'static [&'static str]) -> Box<Fn(&String) -> ::ValidatorResult> {
+    Box::new(move |s: &String| {
+        for needle in needles {
+			if s.contains(needle) {
+				return Err(::Invalid {
+					msg: "Must not contain %1.".to_string(),
+					args: vec![needle.to_string()],
+					human_readable: format!("Must not contain '{}'", needle)
+				});
+			}
+		}
+		Ok(())
     })
 }
 
@@ -137,6 +254,7 @@ pub fn eq<T: 'static>(value: T) -> Box<Fn(&T) -> ::ValidatorResult>
             Err(::Invalid {
                 msg: "Does not equal %1.".to_string(),
                 args: vec![value.to_string()],
+				human_readable: format!("Does not equal '{}'", value)
             })
         }
     })
@@ -158,6 +276,7 @@ pub fn either<T: 'static>(values: Vec<T>) -> Box<Fn(&T) -> ::ValidatorResult>
             Err(::Invalid {
                 msg: "Must be one of %1.".to_string(),
                 args: vec![list.to_string()],
+				human_readable: format!("Must be one of {}", list.to_string())
             })
         }
     })

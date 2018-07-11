@@ -2,10 +2,13 @@
 
 extern crate serde;
 extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
 
 pub mod validators;
+pub mod serde_types;
 
-include!(concat!(env!("OUT_DIR"), "/serde_types.rs"));
+pub use serde_types::*;
 
 pub type ValidatorResult = std::result::Result<(), Invalid>;
 
@@ -111,7 +114,8 @@ macro_rules! rules {
         }
     }};
     ( $( $a:expr => $b:expr => [ $( $c:expr ),* ] ),* ) => {{
-        let multiple_invalids = vec![$(MultipleInvalid {
+        use accord::{MultipleInvalid, MultipleError};
+		let multiple_invalids = vec![$(MultipleInvalid {
                 tag: $a.to_string(),
                 invalids: [$($c(&$b)),*]
                     .iter()
