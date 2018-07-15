@@ -1,7 +1,7 @@
 use ValidatorResult;
+
 #[cfg(feature = "inclusive_range")]
 use std::ops::RangeInclusive;
-
 
 /// Enforce that a `String` is maximum `max` characters long.
 pub fn max(max: usize) -> Box<Fn(&String) -> ::ValidatorResult> {
@@ -127,4 +127,107 @@ pub fn length_if_present(range: RangeInclusive<usize>) -> Box<Fn(&Option<String>
             _ => panic!("range must be a RangeInclusive::NonEmpty"),
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // max
+    #[test]
+    pub fn max_valid() {
+        assert!(max(3)(&"123".to_owned()).is_ok());
+        assert!(max(3)(&"12".to_owned()).is_ok());
+        assert!(max(3)(&"1".to_owned()).is_ok());
+    }
+
+    #[test]
+    pub fn max_invalid() {
+        assert!(max(3)(&"1234".to_owned()).is_err());
+        assert!(max(3)(&"12345".to_owned()).is_err());
+        assert!(max(3)(&"123456".to_owned()).is_err());
+    }
+
+    // min
+    #[test]
+    pub fn min_valid() {
+        assert!(min(3)(&"123".to_owned()).is_ok());
+        assert!(min(3)(&"1234".to_owned()).is_ok());
+        assert!(min(3)(&"12345".to_owned()).is_ok());
+    }
+
+    #[test]
+    pub fn min_invalid() {
+        assert!(min(3)(&"12".to_owned()).is_err());
+        assert!(min(3)(&"1".to_owned()).is_err());
+        assert!(min(3)(&"".to_owned()).is_err());
+    }
+
+    // length & length_if_present
+
+    #[cfg(not(feature = "inclusive_range"))]
+    mod length {
+        use super::super::{length, length_if_present};
+
+        // length
+        #[test]
+        pub fn length_valid() {
+            assert!(length(1, 3)(&"123".to_owned()).is_ok());
+            assert!(length(1, 3)(&"12".to_owned()).is_ok());
+            assert!(length(1, 3)(&"1".to_owned()).is_ok());
+        }
+
+        #[test]
+        pub fn length_invalid() {
+            assert!(length(1, 3)(&"1234".to_owned()).is_err());
+            assert!(length(1, 3)(&"".to_owned()).is_err());
+        }
+        
+        // length_if_present
+        #[test]
+        pub fn length_if_present_valid() {
+            assert!(length_if_present(1, 3)(&Some("123".to_owned())).is_ok());
+            assert!(length_if_present(1, 3)(&Some("12".to_owned())).is_ok());
+            assert!(length_if_present(1, 3)(&None).is_ok());
+        }
+
+        #[test]
+        pub fn length_if_present_invalid() {
+            assert!(length_if_present(1, 3)(&Some("1234".to_owned())).is_err());
+            assert!(length_if_present(1, 3)(&Some("".to_owned())).is_err());
+        }
+    }
+
+    #[cfg(feature = "inclusive_range")]
+    mod length {
+        use super::super::{length, length_if_present};
+
+        // length
+        #[test]
+        pub fn length_valid() {
+            assert!(length(1..=3)(&"123".to_owned()).is_ok());
+            assert!(length(1..=3)(&"12".to_owned()).is_ok());
+            assert!(length(1..=3)(&"1".to_owned()).is_ok());
+        }
+
+        #[test]
+        pub fn length_invalid() {
+            assert!(length(1..=3)(&"1234".to_owned()).is_err());
+            assert!(length(1..=3)(&"".to_owned()).is_err());
+        }
+        
+        // length_if_present
+        #[test]
+        pub fn length_if_present_valid() {
+            assert!(length_if_present(1..=3)(&Some("123".to_owned())).is_ok());
+            assert!(length_if_present(1..=3)(&Some("12".to_owned())).is_ok());
+            assert!(length_if_present(1..=3)(&None).is_ok());
+        }
+
+        #[test]
+        pub fn length_if_present_invalid() {
+            assert!(length_if_present(1..=3)(&Some("1234".to_owned())).is_err());
+            assert!(length_if_present(1..=3)(&Some("".to_owned())).is_err());
+        }
+    }
 }
