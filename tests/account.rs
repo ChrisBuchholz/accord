@@ -1,5 +1,3 @@
-#![cfg_attr(feature = "inclusive_range", feature(inclusive_range_syntax))]
-
 #[macro_use]
 extern crate accord;
 
@@ -27,10 +25,10 @@ impl Accord for Account {
     #[cfg(feature = "inclusive_range")]
     fn validate(&self) -> AccordResult {
         rules!{
-            "name" => self.name => [length(1...64)],
+            "name" => self.name => [length(1..=64)],
 			"username" => self.username => [alphanumeric_dashes()],
-            "email" => self.email => [length(5...64), contains("@"), contains(".")],
-            "age" => self.age => [range(12...127)]
+            "email" => self.email => [length(5..=64), contains("@"), contains(".")],
+            "age" => self.age => [range(12..=127)]
         }
     }
 }

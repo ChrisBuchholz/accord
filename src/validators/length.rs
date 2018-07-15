@@ -75,56 +75,61 @@ pub fn length_if_present(mi: usize, ma: usize) -> Box<Fn(&Option<String>) -> ::V
     })
 }
 
+// TODO: this could be better rust-lang/rust#48111 & rust-lang/rust#32311
+
 #[cfg(feature = "inclusive_range")]
 /// Enforce that a string is minimum `mi` and maximum `ma` characters long.
 pub fn length(range: RangeInclusive<usize>) -> Box<Fn(&String) -> ::ValidatorResult> {
+    // do bounds checking here so we can panic early if needed
+    if range.end() <= range.start() {
+        panic!("Invalid range!"); // TODO: Bad way to do this.
+    }
+
     Box::new(move |s: &String| {
-        match range {
-            RangeInclusive::NonEmpty { ref start, ref end } => {
-                match (min(*start)(s), max(*end)(s)) {
-                    (Err(_), Err(_)) => {
-                        Err(::Invalid {
-                            msg: "Must not be less characters than %1 and not more than %2."
-                                .to_string(),
-                            args: vec![start.to_string(), end.to_string()],
-                            human_readable: format!("Must contain between {} and {} characters", mi, ma)
-                        })
-                    }
-                    (Err(e), _) => Err(e),
-                    (_, Err(e)) => Err(e),
-                    (_, _) => Ok(()),
-                }
+        let start = range.start();
+        let end = range.end();
+        match (min(*start)(s), max(*end)(s)) {
+            (Ok(_), Ok(_)) => Ok(()),
+            _ => {
+                Err(::Invalid {
+                    msg: "Must not be less characters than %1 and not more than %2."
+                        .to_string(),
+                    args: vec![start.to_string(), end.to_string()],
+                    human_readable: format!("Must contain between {} and {} characters", start, end)
+                })
             }
-            _ => panic!("range must be a RangeInclusive::NonEmpty"),
         }
     })
 }
 
+// TODO: this could be better rust-lang/rust#48111 & rust-lang/rust#32311
+
 #[cfg(feature = "inclusive_range")]
 /// Enforce that a string is minimum `mi` and maximum `ma` characters long if it is present. Always ok if not present.
 pub fn length_if_present(range: RangeInclusive<usize>) -> Box<Fn(&Option<String>) -> ::ValidatorResult> {
+    // do bounds checking here so we can panic early if needed
+    if range.end() <= range.start() {
+        panic!("Invalid range!"); 
+    }
+
     Box::new(move |s: &Option<String>| {
         if s.is_none() {
             return Ok(());
         }
         let s = s.as_ref().unwrap();
-        match range {
-            RangeInclusive::NonEmpty { ref start, ref end } => {
-                match (min(*start)(s), max(*end)(s)) {
-                    (Err(_), Err(_)) => {
-                        Err(::Invalid {
-                            msg: "Must not be less characters than %1 and not more than %2."
-                                .to_string(),
-                            args: vec![start.to_string(), end.to_string()],
-                            human_readable: format!("Must contain between {} and {} characters", start, end)
-                        })
-                    }
-                    (Err(e), _) => Err(e),
-                    (_, Err(e)) => Err(e),
-                    (_, _) => Ok(()),
-                }
+        
+        let start = range.start();
+        let end = range.end();
+        match (min(*start)(s), max(*end)(s)) {
+            (Ok(_), Ok(_)) => Ok(()),
+            _ => {
+                Err(::Invalid {
+                    msg: "Must not be less characters than %1 and not more than %2."
+                        .to_string(),
+                    args: vec![start.to_string(), end.to_string()],
+                    human_readable: format!("Must contain between {} and {} characters", start, end)
+                })
             }
-            _ => panic!("range must be a RangeInclusive::NonEmpty"),
         }
     })
 }
