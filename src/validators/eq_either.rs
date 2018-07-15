@@ -40,3 +40,66 @@ pub fn either<T: 'static>(values: Vec<T>) -> Box<Fn(&T) -> ::ValidatorResult>
         }
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fmt;
+
+    #[derive(PartialEq, Clone)]
+    enum TestEnum {
+        Yes,No,Maybe,IDontKnow,RepeatTheQuestion
+    }
+
+    impl Display for TestEnum {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "Doesn't Matter")
+        }
+    }
+
+    // eq
+    #[test]
+    pub fn eq_valid() {
+        assert!(eq(1)(&1).is_ok());
+        assert!(eq("yes")(&"yes").is_ok());
+        assert!(eq(TestEnum::Yes)(&TestEnum::Yes).is_ok());
+        assert!(eq(TestEnum::No)(&TestEnum::No).is_ok());
+    }
+
+    #[test]
+    pub fn eq_invalid() {
+        assert!(eq(1)(&2).is_err());
+        assert!(eq("yes")(&"yesn't").is_err());
+        assert!(eq(TestEnum::Yes)(&TestEnum::No).is_err());
+        assert!(eq(TestEnum::No)(&TestEnum::Yes).is_err());
+    
+    }
+
+    // either
+    #[test]
+    pub fn either_valid() {
+        assert!(either(vec![1, 2, 3])(&1).is_ok());
+        assert!(either(vec![1, 2, 3])(&2).is_ok());
+        assert!(either(vec![1, 2, 3])(&3).is_ok());
+
+        assert!(either(vec!["yes", "no"])(&"yes").is_ok());
+        assert!(either(vec!["yes", "no"])(&"no").is_ok());
+
+        assert!(either(vec![TestEnum::Maybe, TestEnum::IDontKnow])(&TestEnum::Maybe).is_ok());
+        assert!(either(vec![TestEnum::Maybe, TestEnum::IDontKnow])(&TestEnum::IDontKnow).is_ok());
+    }
+
+    #[test]
+    pub fn either_invalid() {
+        assert!(either(vec![1, 2, 3])(&4).is_err());
+        assert!(either(vec![1, 2, 3])(&5).is_err());
+        assert!(either(vec![1, 2, 3])(&6).is_err());
+
+        assert!(either(vec!["yes", "no"])(&"maybe").is_err());
+        assert!(either(vec!["yes", "no"])(&"i don't know").is_err());
+
+        assert!(either(vec![TestEnum::Maybe, TestEnum::IDontKnow])(&TestEnum::Yes).is_err());
+        assert!(either(vec![TestEnum::Maybe, TestEnum::IDontKnow])(&TestEnum::No).is_err());
+        assert!(either(vec![TestEnum::Maybe, TestEnum::IDontKnow])(&TestEnum::RepeatTheQuestion).is_err());
+    }
+}
