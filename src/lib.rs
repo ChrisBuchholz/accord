@@ -3,6 +3,9 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 
+#[cfg(feature = "regex_validator")]
+extern crate regex;
+
 pub mod validators;
 pub mod serde_types;
 
