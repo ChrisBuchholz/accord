@@ -36,6 +36,16 @@ pub fn regex(regex: &'static str, flags: &'static str) -> Box<Fn(&String) -> ::V
     })
 }
 
+/// Convenience function for validating email addresses
+pub fn email() -> Box<Fn(&String) -> ::ValidatorResult> {
+    regex(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", "i")
+}
+
+/// Convenience function for validating URLs.
+pub fn url() -> Box<Fn(&String) -> ::ValidatorResult> {
+    regex(r"^(https?://)?([A-Z]+\.)+[A-Z]{2,}(/[A-Z%0-9_]*)*?(/[A-Z%0-9_]*\.[A-Z%0-9_]*)?([#?][A-Z%0-9=&]*){0,2}$", "i")
+}
+
 #[cfg(test)]
 mod tests
 {
@@ -54,5 +64,48 @@ mod tests
         assert!(regex(r"^a...$", "")(&"a123457".to_owned()).is_err());
         assert!(regex(r"^a...$", "")(&"b".to_owned()).is_err());
         assert!(regex(r"^a...$", "")(&"baaa".to_owned()).is_err());
+    }
+
+    // email
+    #[test]
+    pub fn email_valid() {
+        assert!(email()(&"asdf@asdf.com".to_owned()).is_ok());
+        assert!(email()(&"amazing.email.address@super.amazing.site.tk".to_owned()).is_ok());
+        assert!(email()(&"prick@legal.google".to_owned()).is_ok());
+    }
+
+    #[test]
+    pub fn email_invalid() {
+        assert!(email()(&"you tried.".to_owned()).is_err());
+        assert!(email()(&"so close @super.amazing.site.tk".to_owned()).is_err());
+        assert!(email()(&"prick@legal.g".to_owned()).is_err());
+        assert!(email()(&"prick@important legal documents!.google".to_owned()).is_err());
+    }
+
+    // url
+    #[test]
+    pub fn url_valid() {
+        assert!(url()(&"http://github.com".to_owned()).is_ok());
+        assert!(url()(&"https://github.com".to_owned()).is_ok());
+        assert!(url()(&"www.github.com".to_owned()).is_ok());
+        assert!(url()(&"github.com".to_owned()).is_ok());
+        assert!(url()(&"sub.domains.github.fr".to_owned()).is_ok());
+        assert!(url()(&"neet.cool".to_owned()).is_ok());
+        
+        assert!(url()(&"github.com/org/repo".to_owned()).is_ok());
+        assert!(url()(&"github.com/org/repo/logo.jpeg".to_owned()).is_ok());
+        assert!(url()(&"github.com/org/repo/README#Usage".to_owned()).is_ok());
+        assert!(url()(&"github.com/org/repo?folder=src&sort=desc".to_owned()).is_ok());
+    }
+
+    #[test]
+    pub fn url_invalid() {
+        assert!(url()(&"ftp://super.amazing.site".to_owned()).is_err());
+        assert!(url()(&"http/super.amazing.site".to_owned()).is_err());
+        assert!(url()(&"my awesome site!!.com".to_owned()).is_err());
+        assert!(url()(&"nonon.o".to_owned()).is_err());
+        assert!(url()(&"github.com/invalid file".to_owned()).is_err());
+        assert!(url()(&"github.com/file? bad query params".to_owned()).is_err());
+        assert!(url()(&"github.com/file# bad jump thing".to_owned()).is_err());
     }
 }
